@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+title: "AI Security & Safety Benchmarking"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - name: "AI Security Benchmarking Contributors"
+repository-code: "https://github.com/YOUR_USERNAME/AI-Security-Benchmarking"
+license: MIT
+keywords:
+  - ai-safety
+  - adversarial-robustness
+  - llm-evaluation
+  - red-teaming
+  - prompt-injection
+  - embedding-anomaly-detection
+references:
+  - type: article
+    title: "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection"
+    authors:
+      - family-names: Greshake
+        given-names: Kai
+    year: 2023
+    identifiers:
+      - type: other
+        value: "arXiv:2302.12173"
+  - type: article
+    title: "Red Teaming Language Models with Language Models"
+    authors:
+      - family-names: Perez
+        given-names: Ethan
+    year: 2022
+    identifiers:
+      - type: other
+        value: "arXiv:2202.03286"
+  - type: article
+    title: "HarmBench: A Standardized Evaluation Framework for Automated Red Teaming and Robust Refusal"
+    authors:
+      - family-names: Mazeika
+        given-names: Mantas
+    year: 2024
+    conference:
+      name: "ICML 2024"

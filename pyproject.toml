@@ -1,0 +1,20 @@
+[project]
+name = "ai-security-benchmarking"
+version = "0.1.0"
+description = "Research-grade AI security evaluation: embedding-based anomaly detection, calibrated LLM-as-a-safety-judge, and defense-in-depth pipelines"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "chromadb>=1.5.0",
+    "google-genai>=1.63.0",
+    "ipykernel>=7.1.0",
+    "ipywidgets>=8.1.8",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.8",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.1.0",
+    "scikit-learn>=1.8.0",
+    "scipy>=1.15.0",
+    "torch>=2.10.0",
+    "transformers==4.57.6",
+]

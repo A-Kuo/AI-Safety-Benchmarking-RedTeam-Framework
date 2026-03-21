@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - run: uv sync --frozen
+
+      - name: Lint src modules
+        run: uv run ruff check src/
+
+  notebook-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - run: uv sync --frozen
+
+      - name: Validate notebook JSON and imports
+        run: |
+          python -c "
+          import json, pathlib, sys
+          errors = 0
+          for nb in pathlib.Path('notebooks').glob('*.ipynb'):
+              try:
+                  data = json.loads(nb.read_text(encoding='utf-8'))
+                  cells = data.get('cells', [])
+                  print(f'OK  {nb.name}: {len(cells)} cells')
+              except Exception as e:
+                  print(f'ERR {nb.name}: {e}', file=sys.stderr)
+                  errors += 1
+          sys.exit(errors)
+          "

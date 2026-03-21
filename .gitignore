@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+
+# Secrets
+.env
+
+# Runtime artifacts
+chroma_security/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+*.code-workspace
+.cursor/chat/
+.cursor/globalStorage/
+
+# OS
+.DS_Store
+Thumbs.db
