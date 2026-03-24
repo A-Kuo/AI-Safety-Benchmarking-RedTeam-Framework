@@ -4,7 +4,7 @@ message: "If you use this software, please cite it as below."
 type: software
 authors:
   - name: "AI Security Benchmarking Contributors"
-repository-code: "https://github.com/A-Kuo/AI-Security-Benchmarking"
+repository-code: "https://github.com/A-Kuo/AI-Safety-Benchmarking-RedTeam-Framework"
 license: MIT
 keywords:
   - ai-safety
