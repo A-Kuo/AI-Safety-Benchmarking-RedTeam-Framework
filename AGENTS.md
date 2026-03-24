@@ -54,6 +54,7 @@ Managed by [`uv`](https://docs.astral.sh/uv/).  Install: `uv sync`
 |---------|---------|
 | `chromadb` | Persistent vector store for adversarial prompt embeddings |
 | `google-genai` | Gemini API — red teaming and safety judging (NB2) |
+| `openai` | OpenAI-compatible client — used to call Nemotron via NVIDIA NIM |
 | `transformers` + `torch` | Sentence embeddings via `all-MiniLM-L6-v2` (NB1) |
 | `scikit-learn` | Isolation forest, Ledoit-Wolf covariance, cross-validation |
 | `scipy` | KL divergence, statistical tests |
@@ -67,8 +68,13 @@ Managed by [`uv`](https://docs.astral.sh/uv/).  Install: `uv sync`
 Required for NB2 only.  Store in `.env` (gitignored):
 
 ```
+# Google Gemini (default)
 GCP_PROJECT=your-project-id
 GCP_LOCATION=us-central1
+
+# NVIDIA Nemotron (optional — free key at build.nvidia.com/settings/api-keys)
+NVIDIA_API_KEY=nvapi-your-key-here
+LLM_PROVIDER=gemini   # set to "nemotron" to switch providers
 ```
 
 ---
@@ -157,11 +163,22 @@ Reusable logic extracted from the notebooks:
 | Module | Contents |
 |--------|----------|
 | `detection.py` | `embed_texts`, `centroid_score`, `mahalanobis_score`, `isolation_score`, model loading |
-| `judge.py` | `safety_judge`, `screen_input`, `defense_pipeline`, safety policy definition |
+| `judge.py` | `safety_judge`, `screen_input`, `defense_pipeline`, safety policy definition (Gemini) |
+| `llm_client.py` | Nemotron integration: `make_nemotron_client`, `nemotron_safety_judge`, `nemotron_batch_judge`, `nemotron_defense_pipeline` |
 | `evaluation.py` | `bootstrap_auc`, `wilson_ci`, `cohens_kappa` |
 
 The notebooks are self-contained (no imports from `src/`), but the modules provide
 a testable, importable interface to the same logic.
+
+### Nemotron vs Gemini — when to use each
+
+| Concern | Gemini path (`judge.py`) | Nemotron path (`llm_client.py`) |
+|---------|--------------------------|----------------------------------|
+| Default / existing notebooks | ✓ | — |
+| Reduce consensus-loop token cost (~60 %) | — | `nemotron_batch_judge` (3 verdicts, 1 call) |
+| Prevent goal drift across retries | — | `nemotron_defense_pipeline` (message-list history) |
+| Very long multi-turn attack sequences | — | Nemotron 1 M-token context window |
+| Free tier without GCP setup | — | build.nvidia.com free key |
 
 ---
 
