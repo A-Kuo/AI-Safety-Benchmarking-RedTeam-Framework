@@ -58,7 +58,7 @@ def cohens_kappa(labels1: list[bool], labels2: list[bool]) -> float:
     """Cohen's kappa for two sets of binary labels."""
     n = len(labels1)
     assert n == len(labels2), "Label lists must have equal length"
-    agreement = sum(1 for a, b in zip(labels1, labels2) if a == b)
+    agreement = sum(1 for a, b in zip(labels1, labels2, strict=True) if a == b)
     p_o = agreement / n
     p1 = sum(labels1) / n
     p2 = sum(labels2) / n

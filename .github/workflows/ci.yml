@@ -2,12 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,12 +17,17 @@ jobs:
         with:
           version: "latest"
 
-      - run: uv sync --frozen
+      - name: Install dev dependencies
+        run: uv sync --frozen --group dev
 
-      - name: Lint src modules
-        run: uv run ruff check src/
+      - name: Ruff lint
+        run: uv run ruff check src/ tests/
 
-  notebook-syntax:
+      - name: Ruff format check
+        run: uv run ruff format --check src/ tests/
+
+  test:
+    name: Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,9 +36,19 @@ jobs:
         with:
           version: "latest"
 
-      - run: uv sync --frozen
+      - name: Install all dependencies
+        run: uv sync --frozen --group dev
 
-      - name: Validate notebook JSON and imports
+      - name: Run test suite
+        run: uv run pytest tests/ -v --tb=short --cov=src --cov-report=term-missing
+
+  notebook-validation:
+    name: Notebook Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate notebook JSON and cell counts
         run: |
           python -c "
           import json, pathlib, sys

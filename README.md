@@ -1,5 +1,9 @@
 # AI Security & Safety Benchmarking
 
+[![CI](https://github.com/A-Kuo/AI-Security-Benchmarking/actions/workflows/ci.yml/badge.svg)](https://github.com/A-Kuo/AI-Security-Benchmarking/actions/workflows/ci.yml)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 Research-grade evaluation framework for adversarial robustness, embedding-based anomaly detection, and calibrated LLM safety judging.
 
 Inspired by the [MadData 2026 AmFam Workshop](https://github.com/zachzhou777/MadData-2026-AmFam-Workshop), this project applies the same RAG and LLM evaluation patterns to the domain of AI security.
@@ -28,7 +32,7 @@ Inspired by the [MadData 2026 AmFam Workshop](https://github.com/zachzhou777/Mad
 Requires Python 3.12+ and [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/AI-Security-Benchmarking.git
+git clone https://github.com/A-Kuo/AI-Security-Benchmarking.git
 cd AI-Security-Benchmarking
 uv sync
 cp .env.example .env   # fill in GCP credentials for notebook 02

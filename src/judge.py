@@ -10,9 +10,7 @@ import json
 from typing import Any
 
 import chromadb
-import numpy as np
 from google import genai
-
 
 DEFAULT_MODEL = "gemini-2.5-flash"
 
