@@ -45,6 +45,24 @@ def test_bootstrap_auc_distribution_length():
     assert len(result["distribution"]) <= 300
 
 
+def test_bootstrap_auc_same_seed_is_reproducible():
+    """Two calls with the same random_state must return identical distributions."""
+    labels = np.array([0] * 30 + [1] * 30)
+    scores = np.random.default_rng(7).random(60)
+    r1 = bootstrap_auc(labels, scores, n_bootstrap=200, random_state=99)
+    r2 = bootstrap_auc(labels, scores, n_bootstrap=200, random_state=99)
+    np.testing.assert_array_equal(r1["distribution"], r2["distribution"])
+
+
+def test_bootstrap_auc_different_seeds_differ():
+    """Two calls with different seeds should (with overwhelming probability) differ."""
+    labels = np.array([0] * 30 + [1] * 30)
+    scores = np.random.default_rng(7).random(60)
+    r1 = bootstrap_auc(labels, scores, n_bootstrap=200, random_state=1)
+    r2 = bootstrap_auc(labels, scores, n_bootstrap=200, random_state=2)
+    assert not np.array_equal(r1["distribution"], r2["distribution"])
+
+
 # ---------------------------------------------------------------------------
 # wilson_ci
 # ---------------------------------------------------------------------------

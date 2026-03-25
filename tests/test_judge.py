@@ -202,3 +202,26 @@ def test_pipeline_log_is_list():
     result = defense_pipeline("hello", collection, client)
     assert isinstance(result["log"], list)
     assert len(result["log"]) > 0
+
+
+# ---------------------------------------------------------------------------
+# Error handling
+# ---------------------------------------------------------------------------
+
+
+def test_safety_judge_invalid_json_raises():
+    """Malformed JSON from the API should raise ValueError, not JSONDecodeError."""
+    bad_response = MagicMock()
+    bad_response.text = "not valid json {"
+    client = MagicMock()
+    client.models.generate_content.return_value = bad_response
+    with pytest.raises(ValueError, match="invalid JSON"):
+        safety_judge("prompt", "response", client)
+
+
+def test_screen_input_collection_error_raises():
+    """A collection query failure should be wrapped in RuntimeError."""
+    collection = MagicMock()
+    collection.query.side_effect = Exception("connection refused")
+    with pytest.raises(RuntimeError, match="Input screening query failed"):
+        screen_input("some input", collection)

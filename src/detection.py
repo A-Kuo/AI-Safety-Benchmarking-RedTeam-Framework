@@ -19,8 +19,13 @@ from transformers import AutoModel, AutoTokenizer
 def load_embedding_model(
     model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
 ) -> tuple[AutoTokenizer, AutoModel]:
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name)
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModel.from_pretrained(model_name)
+    except (OSError, ValueError) as exc:
+        raise RuntimeError(
+            f"Failed to load embedding model '{model_name}': {exc}"
+        ) from exc
     model.eval()
     return tokenizer, model
 

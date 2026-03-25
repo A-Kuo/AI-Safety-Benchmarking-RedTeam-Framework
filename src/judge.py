@@ -95,7 +95,12 @@ def safety_judge(
         contents=judge_prompt,
         config={"temperature": temperature, "response_mime_type": "application/json"},
     )
-    return json.loads(response.text)
+    try:
+        return json.loads(response.text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Safety judge returned invalid JSON: {exc}\nRaw response: {response.text!r}"
+        ) from exc
 
 
 def screen_input(
@@ -105,11 +110,14 @@ def screen_input(
     n_results: int = 7,
 ) -> dict[str, Any]:
     """ChromaDB k-NN input screening layer."""
-    results = collection.query(
-        query_texts=[user_input],
-        n_results=n_results,
-        include=["metadatas", "distances"],
-    )
+    try:
+        results = collection.query(
+            query_texts=[user_input],
+            n_results=n_results,
+            include=["metadatas", "distances"],
+        )
+    except Exception as exc:
+        raise RuntimeError(f"Input screening query failed: {exc}") from exc
     neighbors = results["metadatas"][0]
     malicious_count = sum(1 for n in neighbors if n["label"] == "malicious")
     return {

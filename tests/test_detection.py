@@ -12,6 +12,7 @@ from src.detection import (
     fit_isolation_forest,
     fit_mahalanobis,
     isolation_score,
+    load_embedding_model,
     mahalanobis_score,
     mean_pooling,
     normalize_scores,
@@ -46,6 +47,18 @@ def centroids(benign_embeddings, malicious_embeddings):
     cb /= np.linalg.norm(cb)
     cm /= np.linalg.norm(cm)
     return cb, cm
+
+
+# ---------------------------------------------------------------------------
+# load_embedding_model
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.slow
+def test_load_embedding_model_invalid_name_raises():
+    """An unresolvable model name should raise RuntimeError, not OSError."""
+    with pytest.raises(RuntimeError, match="Failed to load embedding model"):
+        load_embedding_model("this-model/does-not-exist-xyz")
 
 
 # ---------------------------------------------------------------------------

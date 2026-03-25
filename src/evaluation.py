@@ -15,12 +15,23 @@ def bootstrap_auc(
     scores: np.ndarray,
     n_bootstrap: int = 1000,
     ci: float = 0.95,
+    random_state: int | None = None,
 ) -> dict[str, float | np.ndarray]:
-    """Compute AUC with bootstrap confidence intervals."""
+    """Compute AUC with bootstrap confidence intervals.
+
+    Args:
+        labels: Binary ground-truth labels.
+        scores: Continuous anomaly/risk scores (higher = more malicious).
+        n_bootstrap: Number of bootstrap resamples.
+        ci: Confidence interval width (e.g. 0.95 for 95% CI).
+        random_state: Seed for the bootstrap RNG. Pass an integer for
+            reproducible results; ``None`` (default) uses a random seed.
+    """
+    rng = np.random.default_rng(random_state)
     n = len(labels)
     aucs: list[float] = []
     for _ in range(n_bootstrap):
-        idx = np.random.choice(n, size=n, replace=True)
+        idx = rng.choice(n, size=n, replace=True)
         if len(np.unique(labels[idx])) < 2:
             continue
         fpr, tpr, _ = roc_curve(labels[idx], scores[idx])

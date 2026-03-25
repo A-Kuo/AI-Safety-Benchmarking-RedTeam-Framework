@@ -29,6 +29,9 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+markers = [
+    "slow: marks tests that require network access or heavy model downloads",
+]
 
 [tool.ruff]
 line-length = 100
