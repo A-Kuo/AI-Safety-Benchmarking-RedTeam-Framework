@@ -7,12 +7,44 @@ and a configurable multi-layer defense pipeline.
 from __future__ import annotations
 
 import json
+import os
 from typing import Any
 
 import chromadb
 from google import genai
 
 DEFAULT_MODEL = "gemini-2.5-flash"
+
+# ---------------------------------------------------------------------------
+# Client factory: Google AI Studio (default) or Vertex AI
+# ---------------------------------------------------------------------------
+
+def make_client(use_vertex: bool | None = None) -> genai.Client:
+    """
+    Build a google-genai client targeting either Google AI Studio or Vertex AI.
+
+    Vertex AI is selected when:
+      - use_vertex=True is passed explicitly, OR
+      - GCP_PROJECT env var is set and use_vertex is None (auto-detect)
+
+    Vertex AI requires:
+      GCP_PROJECT  — Google Cloud project ID
+      GCP_LOCATION — region (default: us-central1)
+      Application Default Credentials (gcloud auth application-default login)
+
+    Google AI Studio requires:
+      GOOGLE_API_KEY env var
+    """
+    if use_vertex is None:
+        use_vertex = bool(os.environ.get("GCP_PROJECT"))
+
+    if use_vertex:
+        return genai.Client(
+            vertexai=True,
+            project=os.environ.get("GCP_PROJECT", ""),
+            location=os.environ.get("GCP_LOCATION", "us-central1"),
+        )
+    return genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
 
 SAFETY_POLICY = {
     1: {

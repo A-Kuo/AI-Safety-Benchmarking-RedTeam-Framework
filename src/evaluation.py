@@ -1,12 +1,14 @@
 """Statistical evaluation utilities for safety benchmarking.
 
 Provides bootstrap confidence intervals, Wilson score intervals,
-Cohen's kappa, and related metrics used across both notebooks.
+Cohen's kappa, permutation-based AUC significance tests, and
+related metrics used across both notebooks.
 """
 
 from __future__ import annotations
 
 import numpy as np
+from scipy import stats
 from sklearn.metrics import auc, roc_curve
 
 
@@ -52,6 +54,65 @@ def wilson_ci(
     center = (p_hat + z**2 / (2 * total)) / denom
     spread = z * np.sqrt((p_hat * (1 - p_hat) + z**2 / (4 * total)) / total) / denom
     return float(center), max(0.0, center - spread), min(1.0, center + spread)
+
+
+def mannwhitney_auc_pvalue(
+    labels: np.ndarray,
+    scores: np.ndarray,
+) -> dict[str, float]:
+    """
+    Compute AUROC and its p-value via Mann-Whitney U test.
+
+    The Mann-Whitney U statistic is equivalent to AUROC:
+        AUROC = U / (n_pos * n_neg)
+
+    The p-value tests H₀: AUROC = 0.5 (random classifier).
+    Uses scipy.stats.mannwhitneyu with the 'greater' alternative,
+    which matches the one-sided hypothesis that positive scores are
+    stochastically greater than negative scores.
+
+    Returns
+    -------
+    dict with keys: auroc, u_statistic, p_value, significant_at_05
+    """
+    pos_scores = scores[labels == 1]
+    neg_scores = scores[labels == 0]
+
+    if len(pos_scores) == 0 or len(neg_scores) == 0:
+        return {"auroc": 0.5, "u_statistic": 0.0, "p_value": 1.0, "significant_at_05": False}
+
+    result = stats.mannwhitneyu(pos_scores, neg_scores, alternative="greater")
+    auroc = result.statistic / (len(pos_scores) * len(neg_scores))
+    significant = bool(result.pvalue < 0.05)
+
+    return {
+        "auroc": float(auroc),
+        "u_statistic": float(result.statistic),
+        "p_value": float(result.pvalue),
+        "significant_at_05": significant,
+    }
+
+
+def ks_distribution_test(
+    scores_a: np.ndarray,
+    scores_b: np.ndarray,
+) -> dict[str, float]:
+    """
+    Kolmogorov-Smirnov test for distributional shift between two score sets.
+
+    Used to detect when the distribution of safety scores drifts between
+    evaluation runs (e.g., before vs. after a model update).
+
+    Returns
+    -------
+    dict with keys: ks_statistic, p_value, shifted (bool at α=0.05)
+    """
+    result = stats.ks_2samp(scores_a, scores_b)
+    return {
+        "ks_statistic": float(result.statistic),
+        "p_value": float(result.pvalue),
+        "shifted": bool(result.pvalue < 0.05),
+    }
 
 
 def cohens_kappa(labels1: list[bool], labels2: list[bool]) -> float:
