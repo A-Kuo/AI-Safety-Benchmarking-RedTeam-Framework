@@ -19,8 +19,7 @@ chroma_security/
 
 # IDE
 *.code-workspace
-.cursor/chat/
-.cursor/globalStorage/
+.cursor/
 
 # OS
 .DS_Store
