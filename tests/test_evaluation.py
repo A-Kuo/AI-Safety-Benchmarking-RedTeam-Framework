@@ -3,7 +3,13 @@
 import numpy as np
 import pytest
 
-from src.evaluation import bootstrap_auc, cohens_kappa, wilson_ci
+from src.evaluation import (
+    bootstrap_auc,
+    cohens_kappa,
+    ks_distribution_test,
+    mannwhitney_auc_pvalue,
+    wilson_ci,
+)
 
 # ---------------------------------------------------------------------------
 # bootstrap_auc
@@ -125,3 +131,50 @@ def test_cohens_kappa_known_value():
 def test_cohens_kappa_length_mismatch_raises():
     with pytest.raises(AssertionError):
         cohens_kappa([True, False], [True])
+
+
+# ---------------------------------------------------------------------------
+# mannwhitney_auc_pvalue
+# ---------------------------------------------------------------------------
+
+
+def test_mannwhitney_auc_pvalue_separable_scores():
+    """Well-separated scores should yield AUROC near 1 and a small p-value."""
+    labels = np.array([0] * 50 + [1] * 50)
+    scores = np.concatenate([np.linspace(0.0, 0.2, 50), np.linspace(0.8, 1.0, 50)])
+    out = mannwhitney_auc_pvalue(labels, scores)
+    assert out["auroc"] == pytest.approx(1.0, abs=1e-2)
+    assert out["p_value"] < 0.05
+    assert out["significant_at_05"] is True
+    assert out["u_statistic"] > 0
+
+
+def test_mannwhitney_auc_pvalue_empty_class_returns_neutral():
+    labels = np.array([0, 0, 0])
+    scores = np.array([0.1, 0.2, 0.3])
+    out = mannwhitney_auc_pvalue(labels, scores)
+    assert out["auroc"] == 0.5
+    assert out["p_value"] == 1.0
+    assert out["significant_at_05"] is False
+
+
+# ---------------------------------------------------------------------------
+# ks_distribution_test
+# ---------------------------------------------------------------------------
+
+
+def test_ks_distribution_test_identical_no_shift():
+    a = np.linspace(0, 1, 100)
+    b = a.copy()
+    out = ks_distribution_test(a, b)
+    assert out["ks_statistic"] == pytest.approx(0.0, abs=1e-12)
+    assert out["p_value"] == pytest.approx(1.0, abs=1e-12)
+    assert out["shifted"] is False
+
+
+def test_ks_distribution_test_clear_shift():
+    a = np.random.default_rng(1).normal(0, 0.5, size=500)
+    b = np.random.default_rng(2).normal(3, 0.5, size=500)
+    out = ks_distribution_test(a, b)
+    assert out["shifted"] is True
+    assert out["p_value"] < 0.05
