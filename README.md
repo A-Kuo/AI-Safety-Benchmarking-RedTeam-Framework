@@ -1,94 +1,205 @@
-# AI Security & Safety Benchmarking
+# AI Safety Benchmarking & Red Team Framework
 
-[![CI](https://github.com/A-Kuo/AI-Safety-Benchmarking-RedTeam-Framework/actions/workflows/ci.yml/badge.svg)](https://github.com/A-Kuo/AI-Safety-Benchmarking-RedTeam-Framework/actions/workflows/ci.yml)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+**Systematic adversarial evaluation for production AI systems**
 
-Research-grade evaluation framework for adversarial robustness, embedding-based anomaly detection, and calibrated LLM safety judging.
+[![Jupyter](https://img.shields.io/badge/Jupyter-Notebooks-orange.svg)](https://jupyter.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
+[![Status](https://img.shields.io/badge/Status-Beta-green.svg)]()
 
-Inspired by the [MadData 2026 AmFam Workshop](https://github.com/zachzhou777/MadData-2026-AmFam-Workshop), this project applies the same RAG and LLM evaluation patterns to the domain of AI security.
+> *"AI safety is not a checklist you complete before shipping. It's a continuous adversarial process — and someone needs to play the adversary."*
 
-## Project structure
+---
 
-```
-├── notebooks/
-│   ├── 01_embedding_anomaly_detection.ipynb   # Embedding-space adversarial detection
-│   └── 02_calibrated_safety_judge.ipynb       # LLM-as-judge + defense pipeline ablation
-├── src/
-│   ├── detection.py       # Centroid, Mahalanobis, isolation forest detectors
-│   ├── judge.py           # Safety judge and defense pipeline
-│   └── evaluation.py      # Bootstrap CI, Wilson CI, Cohen's kappa
-├── .github/workflows/
-│   └── ci.yml             # Lint and notebook validation
-├── Makefile               # Common tasks: install, run, lint, clean
-├── CITATION.cff           # Machine-readable citation metadata
-└── pyproject.toml         # Dependencies (uv / Python ≥3.12)
-```
+## What This Is
 
-**Run order:** notebook 01 first — it creates the ChromaDB collection that notebook 02 extends.
+A structured framework for **red-teaming AI systems** — discovering failure modes, measuring robustness, and documenting vulnerabilities before they affect users.
 
-## Quick start
+Built initially in collaboration with American Family Insurance, this framework generalizes to:
+- Language model safety evaluation (toxicity, bias, jailbreaks)
+- Structured output validation (API schemas, JSON generation)
+- Decision system robustness (classification, scoring, ranking)
+- Multi-agent system stability
 
-Requires Python 3.12+ and [`uv`](https://docs.astral.sh/uv/).
+---
 
-```bash
-git clone https://github.com/A-Kuo/AI-Safety-Benchmarking-RedTeam-Framework.git
-cd AI-Security-Benchmarking
-uv sync
-cp .env.example .env   # fill in GCP credentials for notebook 02
-```
+## Core Philosophy
 
-```bash
-make run-nb1   # execute notebook 01
-make run-nb2   # execute notebook 02 (requires GCP)
-```
+**Red teaming is not about finding edge cases. It's about finding *characteristic* failures — the kinds of inputs that reliably expose model limitations.**
 
-### Environment variables
+This framework provides:
 
-Notebook 02 requires Google Cloud (Vertex AI) credentials:
+| Component | Purpose |
+|-----------|---------|
+| **Attack Taxonomy** | Structured categorization of failure types (not just "prompt injection") |
+| **Automated Probing** | Systematic generation of adversarial inputs |
+| **Failure Clustering** | Group similar failures to identify root causes |
+| **Severity Scoring** | Calibrated assessment of exploitability and impact |
+| **Regression Testing** | Re-run evaluations as models update |
+
+---
+
+## Attack Taxonomy
+
+Instead of ad-hoc testing, we categorize attacks by mechanism:
 
 ```
-GCP_PROJECT=your-project-id
-GCP_LOCATION=us-central1
+┌─────────────────────────────────────────────────────────────────┐
+│                    ATTACK TAXONOMY                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. SEMANTIC MANIPULATION                                       │
+│     • Instruction override ("Ignore previous instructions...")  │
+│     • Context window poisoning                                  │
+│     • Encoding obfuscation (base64, rot13, etc.)                │
+│     • Semantic gap exploitation                                 │
+│                                                                 │
+│  2. STRUCTURE ATTACKS                                           │
+│     • Schema injection in structured outputs                    │
+│     • Delimiter confusion                                       │
+│     • Recursive formatting attacks                             │
+│                                                                 │
+│  3. KNOWLEDGE EXPLOITATION                                      │
+│     • Hallucination amplification                               │
+│     • Confidence manipulation                                   │
+│     • Training data extraction                                  │
+│                                                                 │
+│  4. MULTI-TURN COERCION                                         │
+│     • Gradual escalation chains                                 │
+│     • Persona adoption                                        │
+│     • Reframing and refractory attacks                          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## Key techniques
+---
 
-| Technique | Notebook |
-|-----------|----------|
-| Embedding-based anomaly detection (centroid, Mahalanobis, isolation forest) | 01 |
-| ROC/AUC with bootstrap confidence intervals, stratified k-fold CV | 01 |
-| Adversarial robustness testing (obfuscation, paraphrase, multilingual) | 01 |
-| Automated red teaming — single-turn and multi-turn | 02 |
-| LLM-as-a-safety-judge with Cohen's κ calibration | 02 |
-| Defense-in-depth pipeline with per-layer ablation (9 configurations) | 02 |
-| CWE-aligned vulnerability reports | 02 |
-| Wilson score confidence intervals on all benchmark metrics | 02 |
+## Framework Structure
 
-## Methodology
+```
+ai-safety-redteam/
+├── taxonomy/               # Attack categorization and definitions
+├── generators/             # Adversarial input generation
+│   ├── prompt_based/       # Template-driven attacks
+│   ├── gradient_based/     # Optimization-based (if white-box)
+│   └── llm_driven/         # Recursive LLM-generated attacks
+├── evaluators/             # Success/failure detection
+│   ├── content_policy/     # Toxicity, PII, restricted content
+│   ├── structural/         # JSON schema validation
+│   └── semantic/           # Output meaning verification
+├── clustering/             # Failure pattern analysis
+├── reporting/              # Severity scoring and documentation
+└── regression/             # Continuous evaluation pipelines
+```
 
-### Notebook 01 — Embedding-Space Anomaly Detection
+---
 
-Formalizes a four-level threat model (L0–L3) and evaluates three unsupervised detection methods against adversarial prompts spanning four attack categories. Evaluation includes Fisher's discriminant ratio, KL divergence per category, and a full ablation across all method combinations.
+## Usage Example
 
-### Notebook 02 — Calibrated Safety Evaluation
+```python
+from redteam.framework import RedTeamEvaluator
+from redteam.taxonomy import SemanticManipulation
 
-Implements a configurable four-layer defense pipeline (input screening → prompt hardening → LLM judge → retry loop) and measures the Safety Rate / False Refusal Rate tradeoff across 9 ablation configurations. Judge reliability is quantified via multi-invocation Cohen's κ, and vulnerability findings are mapped to the CWE taxonomy.
+# Initialize evaluator for your model endpoint
+evaluator = RedTeamEvaluator(
+    model_endpoint="https://api.my-llm.com/v1/completions",
+    taxonomy=SemanticManipulation(),
+    evaluator_suite=["content_policy", "structural"]
+)
 
-## References
+# Run evaluation
+results = evaluator.evaluate(
+    num_probes=1000,
+    attack_types=["instruction_override", "encoding_obfuscation"],
+    severity_threshold="medium"
+)
 
-- Greshake et al. (2023). *Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection.* [arXiv:2302.12173](https://arxiv.org/abs/2302.12173)
-- Perez et al. (2022). *Red Teaming Language Models with Language Models.* [arXiv:2202.03286](https://arxiv.org/abs/2202.03286)
-- Zheng et al. (2023). *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.* NeurIPS 2023
-- Mazeika et al. (2024). *HarmBench: A Standardized Evaluation Framework for Automated Red Teaming and Robust Refusal.* ICML 2024
-- Jain et al. (2023). *Baseline Defenses for Adversarial Attacks Against Aligned Language Models.* [arXiv:2309.00614](https://arxiv.org/abs/2309.00614)
-- Alon & Kamfonas (2023). *Detecting Language Model Attacks with Perplexity.* [arXiv:2308.14132](https://arxiv.org/abs/2308.14132)
-- Landis & Koch (1977). *The Measurement of Observer Agreement for Categorical Data.* Biometrics 33(1)
+# Analyze failures
+failure_clusters = results.cluster_failures(method="semantic_embedding")
+for cluster in failure_clusters:
+    print(f"Cluster {cluster.id}: {cluster.description}")
+    print(f"Severity: {cluster.severity}")
+    print(f"Example: {cluster.canonical_example}")
+```
+
+---
+
+## Severity Scoring
+
+Not all failures are equal. We score on two dimensions:
+
+**Exploitability (E):** How easy is it to trigger?
+- E1: Requires insider knowledge or model weights
+- E2: Requires crafted input with domain expertise
+- E3: Simple prompt engineering
+- E4: Accidental triggering (common input)
+
+**Impact (I):** What happens if triggered?
+- I1: Minor output quality degradation
+- I2: Incorrect but benign output
+- I3: Harmful output (toxicity, misinformation)
+- I4: System compromise or data exfiltration
+
+**Overall Severity:** Matrix product E × I, mapped to Critical/High/Medium/Low.
+
+---
+
+## Integration with MLOps
+
+```python
+# As part of CI/CD pipeline
+from redteam.regression import RegressionTestSuite
+
+suite = RegressionTestSuite.from_baseline("v1.2.3_baseline.json")
+new_results = suite.run_against("https://staging-api.my-llm.com")
+
+delta = suite.compare(new_results)
+if delta.has_new_critical_failures():
+    raise DeploymentBlocked("New critical vulnerabilities detected")
+```
+
+---
+
+## Research Context
+
+This work connects to broader AI safety efforts:
+
+- **Anthropic's Constitutional AI** — Our taxonomy extends their harm categories with structural attack vectors
+- **OpenAI's Evals framework** — Complementary: they focus on capability evaluation, we focus on adversarial robustness
+- **Purple Llama (Meta)** — Similar goals, different methodology: we emphasize systematic taxonomy and severity scoring
+
+Related work in this portfolio:
+- [Language-Model-Hallucination-Detection-via-Entropy-Divergence](https://github.com/A-Kuo/Language-Model-Hallucination-Detection-via-Entropy-Divergence) — Uncertainty quantification for safety
+- [CIPHER](https://github.com/A-Kuo/CIPHER) — Cryptographic analysis of AI-generated content
+
+---
+
+## Current Status
+
+**Beta (April 2026)**
+
+- ✅ Core taxonomy defined (4 major categories, 12 subcategories)
+- ✅ Automated prompt-based attack generation
+- ✅ Content policy evaluators (toxicity, PII detection)
+- ✅ JSON schema validation evaluators
+- ✅ Basic clustering using semantic embeddings
+- 🔄 Gradient-based attacks (requires white-box access)
+- 🔄 Multi-turn conversation evaluation
+- ⏸️ Automated severity scoring calibration (requires human rater data)
+
+---
 
 ## Citation
 
-See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.
+```bibtex
+@software{ai_safety_redteam_2026,
+  author = {A-Kuo},
+  title = {AI Safety Benchmarking and Red Team Framework},
+  url = {https://github.com/A-Kuo/AI-Safety-Benchmarking-RedTeam-Framework},
+  year = {2026},
+  note = {Developed in collaboration with American Family Insurance}
+}
+```
 
-## License
+---
 
-MIT
+*Find failures before they find you. April 2026.*
