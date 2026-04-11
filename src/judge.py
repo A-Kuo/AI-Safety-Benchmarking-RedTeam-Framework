@@ -19,6 +19,7 @@ DEFAULT_MODEL = "gemini-2.5-flash"
 # Client factory: Google AI Studio (default) or Vertex AI
 # ---------------------------------------------------------------------------
 
+
 def make_client(use_vertex: bool | None = None) -> genai.Client:
     """
     Build a google-genai client targeting either Google AI Studio or Vertex AI.
@@ -45,6 +46,7 @@ def make_client(use_vertex: bool | None = None) -> genai.Client:
             location=os.environ.get("GCP_LOCATION", "us-central1"),
         )
     return genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
+
 
 SAFETY_POLICY = {
     1: {

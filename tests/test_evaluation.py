@@ -37,8 +37,9 @@ def test_bootstrap_auc_random_classifier():
 def test_bootstrap_auc_ci_ordering():
     """ci_low <= mean <= ci_high must always hold."""
     labels = np.array([0] * 30 + [1] * 30)
-    scores = np.concatenate([np.random.default_rng(0).random(30) * 0.5,
-                              np.random.default_rng(0).random(30) * 0.5 + 0.5])
+    scores = np.concatenate(
+        [np.random.default_rng(0).random(30) * 0.5, np.random.default_rng(0).random(30) * 0.5 + 0.5]
+    )
     result = bootstrap_auc(labels, scores, n_bootstrap=200)
     assert result["ci_low"] <= result["mean"] <= result["ci_high"]
 

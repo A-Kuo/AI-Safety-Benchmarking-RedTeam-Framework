@@ -41,10 +41,9 @@ def make_mock_collection(threat_ratio: float = 0.0) -> MagicMock:
     """Return a mock chromadb Collection with a configurable threat ratio."""
     n_neighbors = 7
     n_malicious = int(threat_ratio * n_neighbors)
-    neighbors = (
-        [{"label": "malicious"} for _ in range(n_malicious)]
-        + [{"label": "benign"} for _ in range(n_neighbors - n_malicious)]
-    )
+    neighbors = [{"label": "malicious"} for _ in range(n_malicious)] + [
+        {"label": "benign"} for _ in range(n_neighbors - n_malicious)
+    ]
     distances = [0.1 * i for i in range(n_neighbors)]
 
     collection = MagicMock()
